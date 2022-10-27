@@ -1,14 +1,22 @@
 #include <SPI.h>
 #include <MFRC522.h>
+#include <Servo.h>
+
 #define SS_PIN 10
 #define RST_PIN 9
+#define diode 2
 #define echoPin 3
 #define trigPin 4
+#define servoPin 5
 
+// Zice za servo crvena 5V ljubicasta/siva GND i bela servoPin
+// RFID spajanje SDA-10 SCK-13 MOSI-11 MI-12 RST-9 gledas sa leva na desno
 MFRC522 mfrc522(SS_PIN, RST_PIN);  
-int diode = 2;
+Servo servo;
+
 long duration;
 int distance;
+bool pcTurnedOn = false;
 
 void setup() {
   pinMode(diode,OUTPUT);
@@ -18,13 +26,17 @@ void setup() {
   SPI.begin();
   mfrc522.PCD_Init();
   digitalWrite(diode,LOW);
-  Serial.print("Poceo je kod");
+  servo.attach(servoPin);
+  servo.write(0);
 }
 
 void loop() {
+  //Serial.println("Usao u loop");
   int distance = 451;   // za 1cm veci od max za svaki slucaj
   if(Authorize()){
 
+      TurnThePCOn();
+      if(pcTurnedOn){
       while(distance >= 60){
         distance = Scan();
         delay(500);  
@@ -32,6 +44,7 @@ void loop() {
       digitalWrite(diode,HIGH);
       delay(1000);
       digitalWrite(diode,LOW);
+      }
   }else{
       digitalWrite(diode,LOW);
       
@@ -57,9 +70,10 @@ int Scan(){
 }
 
 bool Authorize(){
+    //Serial.println("Usao u authorize");
     if ( ! mfrc522.PICC_IsNewCardPresent()) 
     {
-      //Serial.println("Waiting for card");
+      Serial.println("Waiting for card");
       return false;
     }
     if ( ! mfrc522.PICC_ReadCardSerial()) 
@@ -93,4 +107,12 @@ bool Authorize(){
       return false;
     
     }    
+}
+
+void TurnThePCOn(){
+    servo.write(180);
+    delay(2000);
+    servo.write(0);
+    delay(50);
+    pcTurnedOn = true;
 }
