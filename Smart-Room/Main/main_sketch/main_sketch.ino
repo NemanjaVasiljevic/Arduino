@@ -9,7 +9,7 @@
 #define trigPin 4
 #define servoPin 5
 
-// Zice za servo crvena 5V ljubicasta/siva GND i bela servoPin
+// Zice za servo crvena 5V ljubicasta GND i bela servoPin
 // RFID spajanje SDA-10 SCK-13 MOSI-11 MI-12 RST-9 gledas sa leva na desno
 MFRC522 mfrc522(SS_PIN, RST_PIN);  
 Servo servo;
@@ -27,7 +27,7 @@ void setup() {
   mfrc522.PCD_Init();
   digitalWrite(diode,LOW);
   servo.attach(servoPin);
-  servo.write(0);
+  servo.write(180);
 }
 
 void loop() {
@@ -110,9 +110,9 @@ bool Authorize(){
 }
 
 void TurnThePCOn(){
-    servo.write(180);
-    delay(2000);
     servo.write(0);
+    delay(2000);
+    servo.write(180);
     delay(50);
     pcTurnedOn = true;
 }
